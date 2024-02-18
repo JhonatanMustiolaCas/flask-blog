@@ -1,10 +1,10 @@
 import os
+import warnings
 import smtplib
 from datetime import date
 from flask import Flask, abort, render_template, redirect, url_for, flash, request
 from flask_bootstrap import Bootstrap5
 from flask_ckeditor import CKEditor
-from flask_ckeditor.utils import cleanify
 from flask_gravatar import Gravatar
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
@@ -13,6 +13,45 @@ from sqlalchemy import Integer, String, Text
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
+
+try:
+    import bleach
+except ImportError:
+    warnings.warn(
+        'The "bleach" library is not installed, `cleanify` function will not be available.'
+    )
+
+
+def cleanify(text, *, allow_tags=None):
+    """Clean the input from client, this function rely on bleach.
+
+    :parm text: input str
+    :parm allow_tags: if you don't want to use default `allow_tags`,
+        you can provide a Iterable which include html tag string like ['a', 'li',...].
+    """
+    default_allowed_tags = {
+        "a",
+        "abbr",
+        "b",
+        "blockquote",
+        "code",
+        "em",
+        "i",
+        "li",
+        "ol",
+        "pre",
+        "strong",
+        "ul",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "p",
+    }
+    return bleach.clean(text, tags=allow_tags or default_allowed_tags)
+
 
 # Optional: add contact me email functionality (Day 60)
 # import smtplib
