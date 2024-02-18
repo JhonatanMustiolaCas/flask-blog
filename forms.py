@@ -17,18 +17,18 @@ class CreatePostForm(FlaskForm):
 class RegisterForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
-    name = StringField("Name", validators=[DataRequired()])
-    submit = SubmitField("Sign Me Up!")
+    name = StringField("Nombre", validators=[DataRequired()])
+    submit = SubmitField("¡Registrarme!")
 
 
 # Create a form to login existing users
 class LoginForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired()])
-    password = PasswordField("Password", validators=[DataRequired()])
-    submit = SubmitField("Let Me In!")
+    password = PasswordField("Contraseña", validators=[DataRequired()])
+    submit = SubmitField("¡Entrar!")
 
 
 # Create a form to add comments
 class CommentForm(FlaskForm):
-    comment_text = CKEditorField("Comment", validators=[DataRequired()])
-    submit = SubmitField("Submit Comment")
+    comment_text = CKEditorField("Commentario", validators=[DataRequired()])
+    submit = SubmitField("Enviar comentario")

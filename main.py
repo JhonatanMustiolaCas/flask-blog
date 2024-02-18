@@ -1,8 +1,10 @@
 import os
+import smtplib
 from datetime import date
 from flask import Flask, abort, render_template, redirect, url_for, flash, request
 from flask_bootstrap import Bootstrap5
 from flask_ckeditor import CKEditor
+from flask_ckeditor.utils import cleanify
 from flask_gravatar import Gravatar
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
@@ -50,6 +52,7 @@ class Base(DeclarativeBase):
 
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DB_URI", "sqlite:///posts.db")
+app.config["SECRET_KEY"] = "kjhdslkflwjdqoiwjdoqwd"
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
@@ -199,7 +202,7 @@ def show_post(post_id):
             return redirect(url_for("login"))
 
         new_comment = Comment(
-            text=comment_form.comment_text.data,
+            text=cleanify(comment_form.comment_text.data),
             comment_author=current_user,
             parent_post=requested_post,
         )
@@ -269,33 +272,37 @@ def about():
     return render_template("about.html", current_user=current_user)
 
 
-@app.route("/contact", methods=["GET", "POST"])
-def contact():
-    return render_template("contact.html", current_user=current_user)
+# @app.route("/contact", methods=["GET", "POST"])
+# def contact():
+#     return render_template("contact.html", current_user=current_user)
 
 
 # Optional: You can include the email sending code from Day 60:
 # DON'T put your email and password here directly! The code will be visible when you upload to Github.
 # Use environment variables instead (Day 35)
 
-# MAIL_ADDRESS = os.environ.get("EMAIL_KEY")
-# MAIL_APP_PW = os.environ.get("PASSWORD_KEY")
+MAIL_ADDRESS = os.environ.get("EMAIL_FROM_KEY")
+MAIL_ADDRESS_TO = os.environ.get("EMAIL_TO_KEY")
+MAIL_APP_PW = os.environ.get("EMAIL_APP_PW")
 
-# @app.route("/contact", methods=["GET", "POST"])
-# def contact():
-#     if request.method == "POST":
-#         data = request.form
-#         send_email(data["name"], data["email"], data["phone"], data["message"])
-#         return render_template("contact.html", msg_sent=True)
-#     return render_template("contact.html", msg_sent=False)
+
+@app.route("/contact", methods=["GET", "POST"])
+def contact():
+    if request.method == "POST":
+        data = request.form
+        send_email(data["name"], data["email"], data["phone"], data["message"])
+        return render_template("contact.html", msg_sent=True)
+    return render_template("contact.html", msg_sent=False)
+
+
 #
 #
-# def send_email(name, email, phone, message):
-#     email_message = f"Subject:New Message\n\nName: {name}\nEmail: {email}\nPhone: {phone}\nMessage:{message}"
-#     with smtplib.SMTP("smtp.gmail.com") as connection:
-#         connection.starttls()
-#         connection.login(MAIL_ADDRESS, MAIL_APP_PW)
-#         connection.sendmail(MAIL_ADDRESS, MAIL_APP_PW, email_message)
+def send_email(name, email, phone, message):
+    email_message = f"Subject:New Message\n\nName: {name}\nEmail: {email}\nPhone: {phone}\nMessage:{message}"
+    with smtplib.SMTP("smtp.gmail.com") as connection:
+        connection.starttls()
+        connection.login(MAIL_ADDRESS, MAIL_APP_PW)
+        connection.sendmail(MAIL_ADDRESS, MAIL_ADDRESS_TO, email_message)
 
 
 if __name__ == "__main__":
