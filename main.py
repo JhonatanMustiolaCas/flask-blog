@@ -52,7 +52,7 @@ class Base(DeclarativeBase):
 
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DB_URI", "sqlite:///posts.db")
-app.config["SECRET_KEY"] = "kjhdslkflwjdqoiwjdoqwd"
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
